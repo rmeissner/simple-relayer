@@ -1,0 +1,57 @@
+[package]
+name = "simple-relayer"
+version = "0.2.0"
+authors = ["jpalvarezl <jose.alvarez@gnosis.io>"]
+edition = "2018"
+
+[profile.release]
+debug = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+dotenv = "0.15.0"
+dotenv_codegen = "0.15.0"
+
+rocket = "0.4.5"
+rocket_codegen = "0.4.5"
+reqwest = { version = "0.10.6", features = ["blocking"] }
+
+rustc-hex = "2.1.0"
+
+# Ethereum types does not support checksummed addresses
+ethereum-types = { version = "0.8.0", features = ["serialize"]}
+ethabi = "12.0.0"
+ethabi-contract = "11.0.0"
+ethabi-derive = "12.0.0"
+
+secp256k1 = { version = "0.19", features = ["recovery"] }
+tiny-keccak = { version = "2.0", features = ["keccak"] }
+rlp = "0.4"
+
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_repr = "0.1"
+
+derivative = "2.1.1"
+
+chrono = { version = "0.4", features = ["serde"] }
+
+anyhow = "1.0"
+thiserror = "1.0"
+
+mockall = "0.7.2"
+
+zeroize = "1.1"
+
+# Logging
+log = "0.4"
+env_logger = "0.7.1"
+
+[dependencies.rocket_contrib]
+version = "0.4.5"
+default-features = false
+features = ["json", "redis_pool"]
+
+[dev-dependencies]
+cargo-watch = "7.3.0"
