@@ -4,6 +4,10 @@ pub fn service_cache_url() -> String {
     env::var("REDIS").unwrap()
 }
 
+pub fn base_rpc_url() -> String {
+    env::var("RPC_URL").unwrap()
+}
+
 pub fn base_transaction_service_url() -> String {
     format!("{}{}", env::var("TRANSACTION_SERVICE_URL").unwrap(), "/api/v1")
 }

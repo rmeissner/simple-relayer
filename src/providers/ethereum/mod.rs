@@ -3,19 +3,31 @@ pub mod key;
 pub mod types;
 pub mod transaction;
 
-use crate::config::{key_bytes};
+use crate::config::{key_bytes, base_rpc_url};
 use crate::utils::context::Context;
+use types::Bytes;
+use ethereum_types::{Address, U256};
 use anyhow::Result;
 use serde::Serialize;
 use serde_json;
-use ethereum_types::{Address};
 use jsonrpc_core as rpc;
 use transaction::Transaction;
 
 #[derive(Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct Call {
+    pub from: Option<Address>,
+    pub to: Option<Address>,
+    pub gas_price: Option<U256>,
+    pub gas: Option<U256>,
+    pub value: Option<U256>,
+    /// Call data of the transaction, can be empty for simple value transfers.
+    pub data: Option<Bytes>
+}
+
+#[derive(Serialize, Debug)]
 pub struct CallOptions {
-    block: String,
-    from: Option<Address>
+    pub block: String,
 }
 
 pub struct EthereumProvider<'p> {
@@ -39,11 +51,11 @@ impl EthereumProvider<'_> {
 
     pub fn call(
         &self,
-        transaction: &'_ Transaction,
+        transaction: &'_ Call,
         option: &'_ CallOptions
     ) -> Result<String> {
-        let resp = single_rpc_call(self.client, "", build_request(
-            1, "eth_call", vec![serde_json::to_value(&transaction)?, serde_json::to_value(&option)?]
+        let resp = single_rpc_call(self.client, build_request(
+            1, "eth_call", vec![serde_json::to_value(&transaction)?, serde_json::to_value(&option.block)?]
         ))?;
         match resp {
             rpc::Value::String(val) => Ok(val),
@@ -53,11 +65,11 @@ impl EthereumProvider<'_> {
 
     pub fn estimate_gas(
         &self,
-        transaction: &'_ Transaction,
+        transaction: &'_ Call,
         option: &'_ CallOptions
     ) -> Result<String> {
-        let resp = single_rpc_call(self.client, "", build_request(
-            1, "eth_estimateGas", vec![serde_json::to_value(&transaction)?, serde_json::to_value(&option)?]
+        let resp = single_rpc_call(self.client, build_request(
+            1, "eth_estimateGas", vec![serde_json::to_value(&transaction)?, serde_json::to_value(&option.block)?]
         ))?;
         match resp {
             rpc::Value::String(val) => Ok(val),
@@ -70,7 +82,7 @@ impl EthereumProvider<'_> {
         transaction: &'_ Transaction
     ) -> Result<String> {
         let signed = transaction.sign(&self.get_key(), None);
-        let resp = single_rpc_call(self.client, "", build_request(
+        let resp = single_rpc_call(self.client, build_request(
             1, "eth_sendRawTransaction", vec![serde_json::to_value(&signed)?]
         ))?;
         match resp {
@@ -80,8 +92,8 @@ impl EthereumProvider<'_> {
     }
 }
 
-fn single_rpc_call(client: &'_ reqwest::blocking::Client, api: &str, call: rpc::Call) -> Result<rpc::Value> {
-    let response = client.post(api).json(&call).send()?.json::<rpc::Response>()?;
+fn single_rpc_call(client: &'_ reqwest::blocking::Client, call: rpc::Call) -> Result<rpc::Value> {
+    let response = client.post(&base_rpc_url()).json(&call).send()?.json::<rpc::Response>()?;
     match response {
         rpc::Response::Single(output) => to_result_from_output(output),
         _ => anyhow::bail!("Expected single, got batch."),
@@ -92,7 +104,7 @@ fn single_rpc_call(client: &'_ reqwest::blocking::Client, api: &str, call: rpc::
 fn to_result_from_output(output: rpc::Output) -> Result<rpc::Value> {
     match output {
         rpc::Output::Success(success) => Ok(success.result),
-        rpc::Output::Failure(_) => anyhow::bail!("Json RPC call failed!"),
+        rpc::Output::Failure(error) => anyhow::bail!("Json RPC call failed! {:?}", error),
     }
 }
 

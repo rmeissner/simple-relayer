@@ -7,6 +7,7 @@ use serde::Serialize;
 
 /// Raw transaction data to sign
 #[derive(Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct Transaction<'a> {
     /// Nonce to use when signing this transaction.
     pub nonce: U256,

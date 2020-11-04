@@ -32,7 +32,7 @@ impl Serialize for Bytes {
 }
 
 impl<'a> Deserialize<'a> for Bytes {
-    fn deserialize<D>(deserializer: D) -> Result<Bytes, D::Error>
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'a>,
     {
