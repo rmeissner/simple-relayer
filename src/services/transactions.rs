@@ -1,8 +1,6 @@
 use crate::models::service::PreparePayload;
-use crate::providers::ethereum::{Call, CallOptions, EthereumProvider};
+use crate::providers::ethereum::{Call, CallOptions, EthereumProvider, to_string_result};
 use crate::utils::context::Context;
-use std::str::FromStr;
-use ethereum_types::{Address, U256, H256};
 use anyhow::Result;
 
 use ethabi_contract::use_contract;
@@ -11,7 +9,7 @@ use_contract!(eip20, "./res/eip20.json");
 
 pub fn prepare(context: &Context, payload: PreparePayload) -> Result<String> {
     let eth_provider = EthereumProvider::new(context);
-    eth_provider.call(
+    let rpc_out = eth_provider.call(
         &Call {
             to: Some(payload.to),
             from: Some(payload.wallet),
@@ -23,5 +21,6 @@ pub fn prepare(context: &Context, payload: PreparePayload) -> Result<String> {
         &CallOptions {
             block: "latest".to_string()
         }
-    )
+    )?;
+    to_string_result(rpc_out)
 }

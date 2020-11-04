@@ -53,55 +53,51 @@ impl EthereumProvider<'_> {
         &self,
         transaction: &'_ Call,
         option: &'_ CallOptions
-    ) -> Result<String> {
-        let resp = single_rpc_call(self.client, build_request(
+    ) -> Result<rpc::Output> {
+        single_rpc_call(self.client, build_request(
             1, "eth_call", vec![serde_json::to_value(&transaction)?, serde_json::to_value(&option.block)?]
-        ))?;
-        match resp {
-            rpc::Value::String(val) => Ok(val),
-            _ => anyhow::bail!("Unexpected type"),
-        }
+        ))
     }
 
     pub fn estimate_gas(
         &self,
         transaction: &'_ Call,
         option: &'_ CallOptions
-    ) -> Result<String> {
-        let resp = single_rpc_call(self.client, build_request(
+    ) -> Result<rpc::Output> {
+        single_rpc_call(self.client, build_request(
             1, "eth_estimateGas", vec![serde_json::to_value(&transaction)?, serde_json::to_value(&option.block)?]
-        ))?;
-        match resp {
-            rpc::Value::String(val) => Ok(val),
-            _ => anyhow::bail!("Unexpected type"),
-        }
+        ))
     }
 
     pub fn execute(
         &self,
         transaction: &'_ Transaction
-    ) -> Result<String> {
+    ) -> Result<rpc::Output> {
         let signed = transaction.sign(&self.get_key(), None);
-        let resp = single_rpc_call(self.client, build_request(
+        single_rpc_call(self.client, build_request(
             1, "eth_sendRawTransaction", vec![serde_json::to_value(&signed)?]
-        ))?;
-        match resp {
-            rpc::Value::String(val) => Ok(val),
-            _ => anyhow::bail!("Unexpected type"),
-        }
+        ))
     }
 }
 
-fn single_rpc_call(client: &'_ reqwest::blocking::Client, call: rpc::Call) -> Result<rpc::Value> {
+fn single_rpc_call(client: &'_ reqwest::blocking::Client, call: rpc::Call) -> Result<rpc::Output> {
     let response = client.post(&base_rpc_url()).json(&call).send()?.json::<rpc::Response>()?;
     match response {
-        rpc::Response::Single(output) => to_result_from_output(output),
+        rpc::Response::Single(output) => Ok(output),
         _ => anyhow::bail!("Expected single, got batch."),
     }
 }
 
+pub fn to_string_result(output: rpc::Output) -> Result<String> {
+    let resp = to_result_from_output(output)?;
+    match resp {
+        rpc::Value::String(val) => Ok(val),
+        _ => anyhow::bail!("Unexpected type"),
+    }
+}
+
 /// Parse `rpc::Output` into `Result`.
-fn to_result_from_output(output: rpc::Output) -> Result<rpc::Value> {
+pub fn to_result_from_output(output: rpc::Output) -> Result<rpc::Value> {
     match output {
         rpc::Output::Success(success) => Ok(success.result),
         rpc::Output::Failure(error) => anyhow::bail!("Json RPC call failed! {:?}", error),
