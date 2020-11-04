@@ -1157,6 +1157,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "jsonrpc-core"
+version = "15.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0745a6379e3edc893c84ec203589790774e4247420033e71a76d3ab4687991fa"
+dependencies = [
+ "futures",
+ "log 0.4.11",
+ "serde",
+ "serde_derive",
+ "serde_json",
+]
+
+[[package]]
 name = "kernel32-sys"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1918,6 +1931,7 @@ dependencies = [
  "percent-encoding 2.1.0",
  "pin-project-lite",
  "serde",
+ "serde_json",
  "serde_urlencoded",
  "tokio",
  "tokio-tls",
@@ -2223,6 +2237,7 @@ dependencies = [
  "ethabi-contract",
  "ethabi-derive",
  "ethereum-types 0.8.0",
+ "jsonrpc-core",
  "log 0.4.11",
  "mockall",
  "reqwest",

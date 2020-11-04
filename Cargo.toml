@@ -15,7 +15,7 @@ dotenv_codegen = "0.15.0"
 
 rocket = "0.4.5"
 rocket_codegen = "0.4.5"
-reqwest = { version = "0.10.6", features = ["blocking"] }
+reqwest = { version = "0.10.6", features = ["blocking", "json"] }
 
 rustc-hex = "2.1.0"
 
@@ -24,6 +24,8 @@ ethereum-types = { version = "0.8.0", features = ["serialize"]}
 ethabi = "12.0.0"
 ethabi-contract = "11.0.0"
 ethabi-derive = "12.0.0"
+
+jsonrpc-core = "15.0.0"
 
 secp256k1 = { version = "0.19", features = ["recovery"] }
 tiny-keccak = { version = "2.0", features = ["keccak"] }
