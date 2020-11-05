@@ -78,6 +78,12 @@ impl EthereumProvider<'_> {
             1, "eth_sendRawTransaction", vec![serde_json::to_value(&signed)?]
         ))
     }
+
+    pub fn nonce(&self) -> Result<rpc::Output> {
+        single_rpc_call(self.client, build_request(
+            1, "eth_getTransactionCount", vec![serde_json::to_value(self.account())?, serde_json::to_value("pending")?]
+        ))
+    }
 }
 
 fn single_rpc_call(client: &'_ reqwest::blocking::Client, call: rpc::Call) -> Result<rpc::Output> {

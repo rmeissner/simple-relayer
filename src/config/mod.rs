@@ -12,6 +12,14 @@ pub fn base_transaction_service_url() -> String {
     format!("{}{}", env::var("TRANSACTION_SERVICE_URL").unwrap(), "/api/v1")
 }
 
+pub fn transaction_fee() -> String {
+    env::var("TRANSACTION_FEE").unwrap_or("0".to_string())
+}
+
+pub fn multisend_address() -> String {
+    env::var("MULTISEND_ADDRESS").unwrap()
+}
+
 pub fn key_bytes() -> String {
     env::var("KEY_BYTES").unwrap()
 }

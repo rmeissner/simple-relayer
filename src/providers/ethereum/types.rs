@@ -1,4 +1,5 @@
 //https://github.com/tomusdrw/rust-web3/blob/master/src/types/bytes.rs
+use anyhow::Result;
 use rustc_hex::{FromHex, ToHex};
 use serde::de::{Error, Unexpected, Visitor};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -16,9 +17,30 @@ impl fmt::Display for Bytes {
     }
 }
 
-impl<T: Into<Vec<u8>>> From<T> for Bytes {
-    fn from(data: T) -> Self {
+impl From<Vec<u8>> for Bytes {
+    fn from(data: Vec<u8>) -> Self {
         Bytes(data.into())
+    }
+}
+
+fn parse_hex_string(data: String) -> Result<Bytes> {
+    if data.len() >= 2 && &data[0..2] == "0x" {
+        let bytes = FromHex::from_hex(&data[2..])?;
+        Ok(Bytes(bytes))
+    } else {
+        anyhow::bail!("Not hex prefixed string")
+    }
+}
+
+impl From<String> for Bytes {
+    fn from(data: String) -> Self {
+        parse_hex_string(data).unwrap()
+    }
+}
+
+impl From<Bytes> for Vec<u8> {
+    fn from(data: Bytes) -> Self {
+        data.0
     }
 }
 
@@ -53,12 +75,8 @@ impl<'a> Visitor<'a> for BytesVisitor {
     where
         E: Error,
     {
-        if value.len() >= 2 && &value[0..2] == "0x" {
-            let bytes = FromHex::from_hex(&value[2..]).map_err(|e| Error::custom(format!("Invalid hex: {}", e)))?;
-            Ok(Bytes(bytes))
-        } else {
-            Err(Error::invalid_value(Unexpected::Str(value), &"0x prefix"))
-        }
+        parse_hex_string(value.to_string())
+            .map_err(|_| Error::invalid_value(Unexpected::Str(value), &"Invalid hex"))
     }
 
     fn visit_string<E>(self, value: String) -> Result<Self::Value, E>
