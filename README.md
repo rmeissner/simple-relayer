@@ -2,7 +2,7 @@
 
 ## Motivation
 
-This project should make it possible to support relaying of transaction with our without payment. The service doesn't use the build in refund logic of the Safe instead it allows to specify a fixed fee that should be paid via a multisend transaction.
+This project should make it possible to support relaying of transaction with or without payment. The service doesn't use the built-in refund logic of the Safe contracts instead it allows to specify a fixed fee that should be paid via a multisend transaction. This way it should be easy to support other Smart Wallets that also support delegate calls.
 
 ## Quickstart
 
