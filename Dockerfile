@@ -20,7 +20,7 @@ COPY . .
 ARG VERSION
 ARG BUILD_NUMBER
 # Remove fingerprint of app to force recompile (without dependency recompile)
-RUN rm -rf target/release/.fingerprint/safe-client-gateway*
+RUN rm -rf target/release/.fingerprint/simple-relayer*
 RUN cargo build --release --locked
 
 # Image Stage
@@ -39,5 +39,5 @@ RUN set -ex; \
   ca-certificates libssl-dev \
   && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder --chown=rust:rust /app/target/release/safe-client-gateway ./
-CMD ["./safe-client-gateway"]
+COPY --from=builder --chown=rust:rust /app/target/release/simple-relayer ./
+CMD ["./simple-relayer"]
