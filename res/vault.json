@@ -375,11 +375,6 @@
       "constant": true
     },
     {
-      "stateMutability": "payable",
-      "type": "receive",
-      "payable": true
-    },
-    {
       "inputs": [
         {
           "internalType": "address[]",

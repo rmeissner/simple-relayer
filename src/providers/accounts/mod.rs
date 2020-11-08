@@ -1,5 +1,6 @@
 pub mod safe;
 pub mod utils;
+pub mod vault;
 
 use crate::config::{multisend_address, transaction_fee};
 use crate::providers::ethereum::{EthereumProvider};

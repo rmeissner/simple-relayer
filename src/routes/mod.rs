@@ -1,14 +1,20 @@
 extern crate rocket;
 
-use rocket::Route;
 use rocket::Catcher;
+use rocket::Route;
 use rocket_contrib::json::JsonValue;
 
 pub mod about;
 pub mod transactions;
 
 pub fn active_routes() -> Vec<Route> {
-    routes![about::backbone, about::info, transactions::estimate, transactions::execute]
+    routes![
+        about::backbone,
+        about::info,
+        transactions::estimate,
+        transactions::execute_safe,
+        transactions::execute_vault
+    ]
 }
 
 pub fn error_catchers() -> Vec<Catcher> {

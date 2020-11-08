@@ -3,6 +3,7 @@ use crate::models::service::{ExecutePayload, PreparePayload, SafeTransaction};
 use crate::providers::ethereum::transaction::Transaction;
 use crate::providers::accounts::{Account, check_fee, Estimation};
 use crate::providers::accounts::safe::SafeAccount;
+use crate::providers::accounts::vault::{VaultAccount, VaultPayload};
 use crate::providers::ethereum::{to_string_result, EthereumProvider};
 use crate::utils::context::Context;
 use anyhow::Result;
@@ -74,7 +75,7 @@ fn execute_with_estimation(eth_provider: &EthereumProvider, estimation: Estimati
     to_string_result(eth_provider.execute(&tx)?)
 }
 
-pub fn execute(context: &Context, payload: ExecutePayload) -> Result<String> {
+pub fn execute_safe(context: &Context, payload: ExecutePayload) -> Result<String> {
     let eth_provider = EthereumProvider::new(context);
 
     check_fee(
@@ -88,6 +89,22 @@ pub fn execute(context: &Context, payload: ExecutePayload) -> Result<String> {
     let account = SafeAccount { eth_provider: &eth_provider };
     let estimation = account.estimate(&payload)?;
 
-    //TODO check fee > gas * gas_price´
+    Ok(execute_with_estimation(&eth_provider, estimation)?)
+}
+
+pub fn execute_vault(context: &Context, payload: VaultPayload) -> Result<String> {
+    let eth_provider = EthereumProvider::new(context);
+
+    check_fee(
+        &eth_provider,
+        payload.transaction.to,
+        payload.transaction.value,
+        &payload.transaction.data.0,
+        payload.transaction.operation,
+    )?;
+
+    let account = VaultAccount { eth_provider: &eth_provider };
+    let estimation = account.estimate(&payload)?;
+
     Ok(execute_with_estimation(&eth_provider, estimation)?)
 }
