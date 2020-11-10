@@ -14,10 +14,18 @@ pub struct About {
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct PreparePayload {
-    pub wallet: Address,
     pub to: Address,
     pub value: U256,
-    pub data: Bytes
+    pub data: Bytes,
+    pub operation: u8
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct PrepareResult {
+    pub fee: U256,
+    pub fee_receiver: Address,
+    pub transaction: SafeTransaction
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -26,6 +34,16 @@ pub struct ExecutePayload {
     pub wallet: Address,
     pub signatures: Bytes,
     pub transaction: SafeTransaction
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct DeployPayload {
+    pub implementation: Address,
+    pub validators: Vec<Address>,
+    pub signatures: Bytes,
+    pub transaction: SafeTransaction,
+    pub nonce: U256
 }
 
 #[derive(Serialize, Deserialize, Debug)]

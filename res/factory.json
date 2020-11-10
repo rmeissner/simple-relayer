@@ -1,0 +1,98 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "contract ProxyFactory",
+        "name": "_factory",
+        "type": "address"
+      },
+      {
+        "internalType": "contract Initializor",
+        "name": "_initializor",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [],
+    "name": "factory",
+    "outputs": [
+      {
+        "internalType": "contract ProxyFactory",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "initializor",
+    "outputs": [
+      {
+        "internalType": "contract Initializor",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "implementation",
+        "type": "address"
+      },
+      {
+        "internalType": "address payable",
+        "name": "initializerTo",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "initializerValue",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "initializerData",
+        "type": "bytes"
+      },
+      {
+        "internalType": "uint8",
+        "name": "initializerOperation",
+        "type": "uint8"
+      },
+      {
+        "internalType": "address[]",
+        "name": "validators",
+        "type": "address[]"
+      },
+      {
+        "internalType": "bytes",
+        "name": "signatures",
+        "type": "bytes"
+      },
+      {
+        "internalType": "uint256",
+        "name": "nonce",
+        "type": "uint256"
+      }
+    ],
+    "name": "createProxyWithInitializor",
+    "outputs": [
+      {
+        "internalType": "address payable",
+        "name": "proxy",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  }
+]

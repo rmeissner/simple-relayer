@@ -20,6 +20,10 @@ pub fn multisend_address() -> String {
     env::var("MULTISEND_ADDRESS").unwrap()
 }
 
+pub fn factory_address() -> String {
+    env::var("FACTORY_ADDRESS").unwrap()
+}
+
 pub fn key_bytes() -> String {
     env::var("KEY_BYTES").unwrap()
 }
