@@ -1,15 +1,7 @@
 use std::env;
 
-pub fn service_cache_url() -> String {
-    env::var("REDIS").unwrap()
-}
-
 pub fn base_rpc_url() -> String {
     env::var("RPC_URL").unwrap()
-}
-
-pub fn base_transaction_service_url() -> String {
-    format!("{}{}", env::var("TRANSACTION_SERVICE_URL").unwrap(), "/api/v1")
 }
 
 pub fn transaction_fee() -> String {
@@ -28,10 +20,6 @@ pub fn key_bytes() -> String {
     env::var("KEY_BYTES").unwrap()
 }
 
-pub fn webhook_token() -> String {
-    env::var("WEBHOOK_TOKEN").unwrap()
-}
-
 pub fn scheme() -> String {
     env::var("SCHEME").unwrap_or(String::from("https"))
 }
@@ -41,18 +29,6 @@ fn usize_with_default(key: &str, default: usize) -> usize {
         Ok(value) => value.parse().unwrap(),
         Err(_) => default
     }
-}
-
-pub fn info_cache_duration() -> usize {
-    usize_with_default("INFO_CACHE_DURATION", 60 * 15)
-}
-
-pub fn request_cache_duration() -> usize {
-    usize_with_default("REQUEST_CACHE_DURATION", 60 * 15)
-}
-
-pub fn about_cache_duration() -> usize {
-    usize_with_default("ABOUT_CACHE_DURATION", request_cache_duration())
 }
 
 pub fn build_number() -> Option<String> {

@@ -10,12 +10,13 @@ pub mod transactions;
 
 pub fn active_routes() -> Vec<Route> {
     routes![
-        about::backbone,
         about::info,
         deploy::deploy,
         transactions::estimate,
         transactions::execute_safe,
-        transactions::execute_vault
+        transactions::execute_vault,
+        transactions::update_vault,
+        transactions::update_vault_fee
     ]
 }
 

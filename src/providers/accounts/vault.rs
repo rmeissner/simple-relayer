@@ -9,6 +9,30 @@ use ethereum_types::{Address, H256, U256};
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
+pub struct VaultConfigPayload {
+    pub wallet: Address,
+    pub implementation: Address,
+    pub signers: Vec<Address>,
+    pub threshold: U256,
+    pub signature_validator: Address,
+    pub request_guard: Address,
+    pub fallback_handler: Address,
+    pub hook: Bytes,
+    pub nonce: U256,
+    pub meta_hash: H256,
+    pub validation_data: Bytes
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct VaultConfigFee {
+    pub fee: U256,
+    pub fee_receiver: Address,
+    pub hook: Bytes
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct VaultPayload {
     pub wallet: Address,
     pub validation_data: Bytes,
@@ -32,6 +56,42 @@ pub struct VaultAccount<'a> {
 }
 
 use_contract!(stateless_vault, "./res/vault.json");
+
+impl VaultAccount<'_> {
+
+    pub fn estimate_config_update(&self, payload: &VaultConfigPayload) -> Result<Estimation> {
+        let wallet = payload.wallet;
+        let data: Bytes = stateless_vault::functions::update_config::encode_input(
+            payload.implementation,
+            payload.signers.clone(),
+            payload.threshold,
+            payload.signature_validator,
+            payload.request_guard,
+            payload.fallback_handler,
+            payload.hook.clone(),
+            payload.nonce,
+            payload.meta_hash,
+            payload.validation_data.clone()
+        ).into();
+        let call = Call {
+            to: Some(wallet),
+            value: None,
+            data: Some(data.clone()),
+            gas: None,
+            gas_price: None,
+            from: Some(self.eth_provider.account()),
+        };
+        let options = CallOptions {
+            block: "latest".to_string(),
+        };
+        let estimate_result = to_string_result(self.eth_provider.estimate_gas(&call, &options)?)?;
+        let mut estimate = u64::from_str_radix(estimate_result.trim_start_matches("0x"), 16)?;
+        estimate += estimate / 4;
+        Ok(Estimation { wallet, estimate: U256::from(estimate), data })
+    }
+
+}
+
 impl Account for VaultAccount<'_> {
     type Payload = VaultPayload;
     fn estimate(&self, payload: &Self::Payload) -> Result<Estimation> {

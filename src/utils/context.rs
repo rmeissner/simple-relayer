@@ -3,12 +3,10 @@ use rocket::Outcome;
 use rocket::State;
 use rocket::http::uri::Origin;
 
-use crate::utils::cache::{ServiceCache};
 use crate::config::scheme;
 
 pub struct Context<'a, 'r> {
-    request: &'a Request<'r>,
-    cache: ServiceCache,
+    request: &'a Request<'r>
 }
 
 impl<'a, 'r> Context<'a, 'r> {
@@ -18,10 +16,6 @@ impl<'a, 'r> Context<'a, 'r> {
 
     pub fn client(&self) -> &'r reqwest::blocking::Client {
         self.get::<State<reqwest::blocking::Client>>().inner()
-    }
-
-    pub fn cache(&self) -> &ServiceCache {
-        &self.cache
     }
 
     pub fn uri(&self) -> String {
@@ -43,7 +37,6 @@ impl<'a, 'r> FromRequest<'a, 'r> for Context<'a, 'r> {
     type Error = ();
 
     fn from_request(request: &'a Request<'r>) -> request::Outcome<Self, Self::Error> {
-        let cache = request.guard().unwrap();
-        return Outcome::Success(Context { request, cache });
+        return Outcome::Success(Context { request });
     }
 }

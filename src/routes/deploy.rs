@@ -1,6 +1,6 @@
 use crate::utils::context::Context;
 use crate::services::deployment;
-use crate::models::service::{DeployPayload};
+use crate::models::{DeployPayload};
 use rocket_contrib::json::Json;
 use anyhow::Result;
 

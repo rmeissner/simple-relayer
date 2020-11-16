@@ -1,4 +1,4 @@
-use crate::models::service::{SafeTransaction};
+use crate::models::{SafeTransaction};
 use crate::providers::ethereum::types::Bytes;
 use ethereum_types::{Address, U256};
 use ethabi_contract::use_contract;

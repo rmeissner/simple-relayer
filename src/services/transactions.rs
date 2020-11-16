@@ -1,13 +1,15 @@
 use crate::config::{multisend_address, transaction_fee};
-use crate::models::service::{ExecutePayload, PreparePayload, PrepareResult, SafeTransaction};
+use crate::models::{ExecutePayload, PreparePayload, PrepareResult, SafeTransaction};
 use crate::providers::accounts::safe::SafeAccount;
-use crate::providers::accounts::vault::{VaultAccount, VaultPayload};
-use crate::providers::accounts::{check_fee, Account, Estimation};
+use crate::providers::accounts::vault::{VaultAccount, VaultPayload, VaultConfigPayload, VaultConfigFee};
+use crate::providers::accounts::{check_fee, check_payment_tx, Account, Estimation};
 use crate::providers::ethereum::transaction::Transaction;
+use crate::providers::ethereum::types::Bytes;
 use crate::providers::ethereum::{to_string_result, EthereumProvider};
 use crate::utils::context::Context;
 use anyhow::Result;
 use ethabi;
+use ethabi::{ParamType, Token};
 use ethabi_contract::use_contract;
 use ethereum_types::{Address, U256};
 use serde_json;
@@ -122,4 +124,54 @@ pub fn execute_vault(context: &Context, payload: VaultPayload) -> Result<String>
     let estimation = account.estimate(&payload)?;
 
     Ok(execute_with_estimation(&eth_provider, estimation)?)
+}
+
+pub fn update_vault(context: &Context, payload: VaultConfigPayload) -> Result<String> {
+    let eth_provider = EthereumProvider::new(context);
+
+    let fee = U256::from_dec_str(&transaction_fee())?;
+    if fee != U256::zero() {
+        let hook_parts = ethabi::decode(&[ParamType::Address, ParamType::Uint(256), ParamType::Bytes, ParamType::Uint(8)], &payload.hook.0)?;
+        let decoded_hook = SafeTransaction {
+            to: if let Token::Address(v) = hook_parts[0] { v } else { anyhow::bail!("Could not decode hook") },
+            value: if let Token::Uint(v) = hook_parts[0] { v } else { anyhow::bail!("Could not decode hook") },
+            data: if let Token::Bytes(v) = &hook_parts[0] { Bytes(v.clone()) } else { anyhow::bail!("Could not decode hook") },
+            operation:  if let Token::Uint(v) = hook_parts[0] { v.byte(0) } else { anyhow::bail!("Could not decode hook") },
+            safe_tx_gas: U256::zero()
+        };
+        check_payment_tx(
+            &eth_provider,
+            &decoded_hook,
+            fee
+        )?;
+    }
+
+    let account = VaultAccount {
+        eth_provider: &eth_provider,
+    };
+    let estimation = account.estimate_config_update(&payload)?;
+
+    Ok(execute_with_estimation(&eth_provider, estimation)?)
+}
+
+pub fn update_vault_hook(context: &Context) -> Result<VaultConfigFee> {
+    let fee = U256::from_dec_str(&transaction_fee())?;
+    if fee == U256::zero() {
+        // Nothing to prepare
+        return Ok(VaultConfigFee {
+            fee,
+            fee_receiver: Address::zero(),
+            hook: Bytes(vec![])
+        });
+    }
+    let eth_provider = EthereumProvider::new(context);
+    let relayer = eth_provider.account();
+    let hook = ethabi::encode(
+        &[Token::Address(relayer.clone()), Token::Uint(fee), Token::Bytes(vec![]), Token::Uint(U256::zero())]
+    );
+    Ok(VaultConfigFee {
+        fee,
+        fee_receiver: relayer,
+        hook: Bytes(hook)
+    })
 }
