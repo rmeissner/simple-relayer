@@ -28,4 +28,4 @@ Note: make sure that config variables are set
 - Setup herokue buildpack: https://github.com/emk/heroku-buildpack-rust
   - `heroku buildpacks:set emk/rust`
 - Push to heroku
-  - `git push heroku master`
+  - `git push heroku main`
