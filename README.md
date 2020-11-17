@@ -6,26 +6,26 @@ This project should make it possible to support relaying of transaction with or 
 
 ## Quickstart
 
-This project requires `rustup` and `redis`
+This project requires `rustup`
 
 - Clone project and go to project folder
 - `rustup default nightly` (Rocket currently requires a nightly version)
 - `cp .env.sample .env`
-- `redis-server`
 - `cargo run`
 
 ## Configuration
 
-Rocket specific configurations (including databases) can be configured via the `Rocket.toml` for local development (see https://rocket.rs/v0.4/guide/configuration/#rockettoml).
+For configurations specific to this service the `.env` file can be used.
 
-For configurations specific to this service the `.env` file can be used. See next section.
+## Heroku deployment
 
-## Environment
+Note: make sure that config variables are set
 
-Place a `.env` file in the root of the project containing URL pointing to the environment in which you want the gateway to run.
-
-The contents of the file should be the following (see `.env.sample` for an example):
-
-```
-TRANSACTION_SERVICE_URL=<Transaction service host>
-``` 
+- Login to heroku
+  - `heroku login`
+- Add heroku remote
+  - `heroku git:remote -a <app name>`
+- Setup herokue buildpack: https://github.com/emk/heroku-buildpack-rust
+  - `heroku buildpacks:set emk/rust`
+- Push to heroku
+  - `git push heroku master`
