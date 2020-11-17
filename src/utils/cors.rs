@@ -1,5 +1,5 @@
 use rocket::fairing::{Fairing, Info, Kind};
-use rocket::http::{ContentType, Header, Method};
+use rocket::http::{ContentType, Header, Method, Status};
 use rocket::{Request, Response};
 use std::io::Cursor;
 
@@ -14,9 +14,11 @@ impl Fairing for CORS {
     }
 
     fn on_response(&self, request: &Request, response: &mut Response) {
-        // TODO https://github.com/lawliet89/rocket_cors/blob/master/examples/fairing.rs
-        if request.method() == Method::Options || response.content_type() == Some(ContentType::JSON)
-        {
+        if request.method() == Method::Options {
+            response.set_status(Status::NoContent);
+            response.set_header(ContentType::Plain);
+            response.set_sized_body(Cursor::new(""));
+        } else {
             response.set_header(Header::new("Access-Control-Allow-Origin", "*"));
             response.set_header(Header::new(
                 "Access-Control-Allow-Methods",
@@ -27,11 +29,6 @@ impl Fairing for CORS {
                 "X-Requested-With, Content-Type, Authorization",
             ));
             response.set_header(Header::new("Access-Control-Allow-Credentials", "true"));
-        }
-
-        if request.method() == Method::Options {
-            response.set_header(ContentType::Plain);
-            response.set_sized_body(Cursor::new(""));
         }
     }
 }
