@@ -16,9 +16,22 @@ pub fn factory_address() -> String {
     env::var("FACTORY_ADDRESS").unwrap()
 }
 
-pub fn key_bytes() -> String {
-    env::var("KEY_BYTES").unwrap()
+pub fn exec_tx_refunder_address() -> String {
+    env::var("EXEC_TRANSACTION_REFUNDER_ADDRESS").unwrap()
 }
+
+pub fn chain_id() -> u64 {
+    env::var("CHAIN_ID").unwrap().parse().unwrap()
+}
+
+pub fn default_key_bytes() -> String {
+    env::var("DEFAULT_KEY_BYTES").unwrap()
+}
+
+pub fn itx_key_bytes() -> String {
+    env::var("ITX_KEY_BYTES").unwrap()
+}
+
 
 pub fn scheme() -> String {
     env::var("SCHEME").unwrap_or(String::from("https"))

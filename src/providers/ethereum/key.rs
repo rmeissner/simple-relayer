@@ -6,6 +6,7 @@ use thiserror::Error;
 use secp256k1::key::ONE_KEY;
 use secp256k1::Error as Secp256k1Error;
 use secp256k1::{Message, PublicKey, Secp256k1, SecretKey};
+use serde::{Deserialize, Serialize};
 use std::fmt::{self, Debug, Formatter};
 use std::ops::Deref;
 use std::str::FromStr;
@@ -19,6 +20,8 @@ use zeroize::{DefaultIsZeroes, Zeroizing};
 #[error("invalid private key")]
 pub struct InvalidPrivateKey;
 
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct Signature {
     pub r: [u8; 32],
     pub s: [u8; 32],

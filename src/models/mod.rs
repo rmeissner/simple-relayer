@@ -54,3 +54,11 @@ pub struct SafeTransaction {
     pub operation: u8,
     pub safe_tx_gas: U256
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct GenericRelayData {
+    pub to: Address,
+    pub method: String,
+    pub method_data: Bytes
+}

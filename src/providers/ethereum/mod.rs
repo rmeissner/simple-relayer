@@ -3,12 +3,13 @@ pub mod key;
 pub mod types;
 pub mod transaction;
 
-use crate::config::{key_bytes, base_rpc_url};
+use std::str;
+use crate::config::{default_key_bytes, itx_key_bytes, base_rpc_url};
 use crate::utils::context::Context;
 use types::Bytes;
 use ethereum_types::{Address, U256};
 use anyhow::Result;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use serde_json;
 use jsonrpc_core as rpc;
 use transaction::Transaction;
@@ -30,9 +31,22 @@ pub struct CallOptions {
     pub block: String,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct ItxTransaction {
+    pub to: Address,
+    pub data: Bytes,
+    pub gas: String
+}
+
 pub struct EthereumProvider<'p> {
     client: &'p reqwest::blocking::Client
 }
+
+pub enum KeyType {
+    Default,
+    Itx
+} 
 
 impl EthereumProvider<'_> {
     pub fn new<'p>(context: &'p Context) -> EthereumProvider<'p> {
@@ -41,12 +55,19 @@ impl EthereumProvider<'_> {
         }
     }
 
-    fn get_key(&self) -> key::PrivateKey {
-        key::PrivateKey::from_hex_str(key_bytes()).unwrap()
+    fn get_key(&self, key_type: KeyType) -> key::PrivateKey {
+        key::PrivateKey::from_hex_str(match key_type {
+            KeyType::Default => default_key_bytes(),
+            KeyType::Itx => itx_key_bytes()
+        }).unwrap()
     }
 
     pub fn account(&self) -> Address {
-        self.get_key().public_address()
+        self.get_key(KeyType::Default).public_address()
+    }
+
+    pub fn itx_account(&self) -> Address {
+        self.get_key(KeyType::Itx).public_address()
     }
 
     pub fn call(
@@ -73,15 +94,32 @@ impl EthereumProvider<'_> {
         &self,
         transaction: &'_ Transaction
     ) -> Result<rpc::Output> {
-        let signed = transaction.sign(&self.get_key(), None);
+        let signed = transaction.sign(&self.get_key(KeyType::Default), None);
         single_rpc_call(self.client, build_request(
             1, "eth_sendRawTransaction", vec![serde_json::to_value(&signed)?]
         ))
     }
 
+    pub fn sign(
+        &self,
+        message: &[u8],
+        key_type: KeyType
+    ) -> Result<key::Signature> {
+        let encoded_message = [format!("\x19Ethereum Signed Message:\n{}", message.len()).as_bytes(), message].concat();
+        log::debug!("encoded_message: {:?}", encoded_message);
+        let hash = hash::keccak256(&encoded_message);
+        Ok(self.get_key(key_type).sign(&hash))
+    }
+
     pub fn nonce(&self) -> Result<rpc::Output> {
         single_rpc_call(self.client, build_request(
             1, "eth_getTransactionCount", vec![serde_json::to_value(self.account())?, serde_json::to_value("pending")?]
+        ))
+    }
+
+    pub fn itx_relay(&self, tx: &ItxTransaction, signature: &Bytes) -> Result<rpc::Output> {
+        single_rpc_call(self.client, build_request(
+            1, "relay_sendTransaction", vec![serde_json::to_value(tx)?, serde_json::to_value(signature)?]
         ))
     }
 }

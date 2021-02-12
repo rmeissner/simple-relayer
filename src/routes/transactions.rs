@@ -1,6 +1,7 @@
 use crate::utils::context::Context;
 use crate::services::transactions;
-use crate::models::{ExecutePayload, PreparePayload};
+use crate::services::itx;
+use crate::models::{ExecutePayload, GenericRelayData, PreparePayload};
 use crate::providers::accounts::vault::{VaultPayload, VaultConfigPayload};
 use rocket::response::content;
 use rocket_contrib::json::Json;
@@ -29,4 +30,9 @@ pub fn update_vault(context: Context, update: Json<VaultConfigPayload>) -> Resul
 #[get("/v1/transactions/update/vault", format = "json")]
 pub fn update_vault_fee(context: Context) -> Result<content::Json<String>> {
     Ok(content::Json(serde_json::to_string(&transactions::update_vault_hook(&context)?)?))
+}
+
+#[post("/v1/transactions/execute/generic", format = "json", data = "<transaction>")]
+pub fn relay_itx(context: Context, transaction: Json<GenericRelayData>) -> Result<String> {
+    itx::relay_itx(&context, transaction.0)
 }

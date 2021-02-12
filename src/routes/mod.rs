@@ -16,7 +16,8 @@ pub fn active_routes() -> Vec<Route> {
         transactions::execute_safe,
         transactions::execute_vault,
         transactions::update_vault,
-        transactions::update_vault_fee
+        transactions::update_vault_fee,
+        transactions::relay_itx
     ]
 }
 
